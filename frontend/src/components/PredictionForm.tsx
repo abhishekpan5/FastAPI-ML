@@ -94,6 +94,7 @@ export const PredictionForm = () => {
   const [prediction, setPrediction] = useState<{
     category: string;
     confidence: number;
+    class_probabilities: Record<string, number>;
   } | null>(null);
 
   const [error, setError] = useState<string | null>(null);
@@ -137,6 +138,7 @@ export const PredictionForm = () => {
         setPrediction({
           category: response.predicted_category,
           confidence: response.confidence,
+          class_probabilities: response.class_probabilities,
         });
       } else {
         setError('Invalid response from server');
@@ -389,25 +391,44 @@ export const PredictionForm = () => {
           {prediction && (
             <Alert 
               severity="success" 
-              sx={{ 
-                mt: 3,
-                backgroundColor: alpha(COLORS.success, 0.1),
-                color: COLORS.success,
-                '& .MuiAlert-icon': {
-                  color: COLORS.success,
-                },
-              }}
+              sx={{ mt: 3, backgroundColor: alpha(COLORS.success, 0.1), color: COLORS.success }}
             >
-              <Typography variant="h6" sx={{ color: COLORS.success, mb: 1 }}>
-                Prediction Result
-              </Typography>
-              <Box sx={{ color: COLORS.text }}>
-                <Typography sx={{ mb: 1 }}>
-                  <strong>Category:</strong> {prediction.category}
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="h6" sx={{ color: 'inherit' }}>
+                  Prediction Result
                 </Typography>
-                <Typography>
-                  <strong>Confidence:</strong> {(prediction.confidence * 100).toFixed(2)}%
+              </Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mt: 2 }}>
+                <Box>
+                  <Typography variant="subtitle2" sx={{ color: 'inherit', opacity: 0.8 }}>
+                    Predicted Category
+                  </Typography>
+                  <Typography variant="h6" sx={{ color: 'inherit' }}>
+                    {prediction.category}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" sx={{ color: 'inherit', opacity: 0.8 }}>
+                    Confidence Score
+                  </Typography>
+                  <Typography variant="h6" sx={{ color: 'inherit' }}>
+                    {(prediction.confidence * 100).toFixed(1)}%
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" sx={{ color: 'inherit', opacity: 0.8 }}>
+                  Class Probabilities
                 </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 1 }}>
+                  {Object.entries(prediction.class_probabilities).map(([category, prob]) => (
+                    <Box key={category} sx={{ p: 1, backgroundColor: alpha(COLORS.primary, 0.05), borderRadius: 1, minWidth: 120 }}>
+                      <Typography variant="body2">
+                        <strong>{category}:</strong> {(prob * 100).toFixed(2)}%
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
               </Box>
             </Alert>
           )}
